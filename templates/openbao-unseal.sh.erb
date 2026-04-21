@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+API_URL="<%= @api_address %>"
+KEY_FILE="<%= node['openbao']['unseal_key_path'] %>"
+
+SEAL_STATUS=$(curl -s "${API_URL}/v1/sys/seal-status")
+SEALED=$(echo "$SEAL_STATUS" | jq -r '.sealed')
+
+if [[ "$SEALED" != "true" ]]; then
+ exit 0
+fi
+
+if [[ ! -f "$KEY_FILE" ]]; then
+  echo "Unseal key file not found: $KEY_FILE"
+  exit 1
+fi
+
+# читаем файл построчно
+while IFS= read -r UNSEAL_KEY || [[ -n "$UNSEAL_KEY" ]]; do
+  curl -s \
+    --request POST \
+    --data "{\"key\": \"${UNSEAL_KEY}\"}" \
+    "${API_URL}/v1/sys/unseal" > /dev/null
+done < "$KEY_FILE"
+
+exit 0

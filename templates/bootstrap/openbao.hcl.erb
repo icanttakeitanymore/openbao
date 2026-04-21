@@ -1,0 +1,28 @@
+ui = true
+
+api_addr     = "<%= @schema %>://<%= node['fqdn'] %>:8200"
+cluster_addr = "<%= @schema %>://<%= node['fqdn'] %>:8201"
+
+listener "tcp" {
+  address         = "0.0.0.0:8200"
+  cluster_address = "0.0.0.0:8201"
+
+  <% if @tls_enabled %>
+  tls_disable = 0
+  tls_cert_file = "/etc/openbao/cert.pem"
+  tls_key_file  = "/etc/openbao/key.pem"
+  tls_client_ca_file = "/etc/openbao/ca.pem"
+  <% else %>
+  tls_disable = 1
+  <% end %>
+}
+
+storage "raft" {
+  path = "/opt/openbao/data"
+
+  <% @nodes.each do |n| %>
+  retry_join {
+    leader_api_addr = "<%= @schema %>://<%= n %>:8200"
+  }
+  <% end %>
+}

@@ -1,0 +1,42 @@
+# stupidly lazy cookbook for openbao raft cluster.
+# it requires around of two chef-client runs to get tls cluster with internal pki.
+# 1st will create cluster without tls on each node.
+# - make sure you unseal other nodes before 2nd run.
+# 2nd must will restart services with tls enabled.
+# 3rd maybe needed sometimes if it fails make 4rd and so on. Pure magic.
+# 
+# did with it 3-4 clusters from scratch, not ideal but better than handjob.
+
+default['openbao']['nodes'] = %w(
+  01.vault.east.local
+  02.vault.east.local
+  03.vault.east.local
+)
+
+default['openbao']['vip_hostname'] = 'openbao.east.local'
+
+
+default['openbao']['bootstrap']['auto_init'] = true
+default['openbao']['bootstrap']['init_host'] = "01.vault.east.local"
+
+# you don't need more if after people leave your team you don't rekey vault.
+# you sould do it, but you won't. but you don't if it's a lab.
+default['openbao']['bootstrap']['secret_shares'] = 1
+default['openbao']['bootstrap']['secret_threshold'] = 1
+
+# unseal_key and root_token will be thrown into
+# node['openbao']['bootstrap']['secret'] + 'bootstrap' after init.
+# throw them on fs to 02 and 03 nodes by hand unseal timer will unseal them or do manually.
+# anyway while chef-to-vault auth integration is not done
+# you will need root token for many things on node, like pki init and so on
+# later you can drop them or unseal manually.
+
+default['openbao']['unseal_key_path'] = '/etc/openbao/unseal_key'
+default['openbao']['token_path'] = '/etc/openbao/root_token'
+
+default['openbao']['bootstrap']['secret'] = 'bao'
+default['openbao']['bootstrap']['pki_mount'] = 'bao-pki' # oh fuck, fuck, fuck with vault-0.18.2. (it can be undersored of course)
+default['openbao']['bootstrap']['pki_role'] = 'bao'
+
+# after the run put /etc/openbao/ca.pem into your system ca bundle
+# or make new pki.
