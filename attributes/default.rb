@@ -1,11 +1,4 @@
-# stupidly lazy cookbook for openbao raft cluster.
-# it requires around of two chef-client runs to get tls cluster with internal pki.
-# 1st will create cluster without tls on each node.
-# - make sure you unseal other nodes before 2nd run.
-# 2nd must will restart services with tls enabled.
-# 3rd maybe needed sometimes if it fails make 4rd and so on. Pure magic.
-# 
-# did with it 3-4 clusters from scratch, not ideal but better than handjob.
+
 
 default['openbao']['nodes'] = %w(
   01.vault.east.local
