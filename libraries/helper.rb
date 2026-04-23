@@ -123,14 +123,15 @@ module Openbao
           Vault.token = token
         end
       elsif ::File.exists? '/etc/cinc/client.pem'
-      token = chef_vault_auth('/etc/cinc/client.pem')
-      if token
-        Vault.token = token
-      end
+        token = chef_vault_auth('/etc/cinc/client.pem')
+        if token
+          Vault.token = token
+        end
       end
       if !Vault.token
         raise 'cannot configure vault'
       end
+
       Vault.configure do |config|
         config.ssl_ca_cert = system_ca_file(@node)
       end
@@ -485,6 +486,29 @@ module Openbao
     rescue Vault::HTTPClientError => e
       return nil if e.message.include?('404')
 
+      raise
+    end
+
+    def read_policy(name)
+      Vault.sys.policy(name)
+    rescue Vault::HTTPError => e
+      return nil if e.code == 404
+
+      raise
+    end
+
+    def write_policy(name, rules_string)
+      # Метод SDK обернет эту строку в { "rules": rules_string }
+      Vault.sys.put_policy(name, rules_string)
+    end
+
+    def delete_policy(name)
+      Vault.sys.delete_policy(name)
+
+      Chef::Log.info("Policy written: #{name}")
+      true
+    rescue => e
+      Chef::Log.error("Failed to write policy #{name}: #{e}")
       raise
     end
 
