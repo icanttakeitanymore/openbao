@@ -2,7 +2,6 @@ require 'vault'
 require 'timeout'
 
 module Openbao
-
   class Client
     def initialize(node)
       @node = node
@@ -30,62 +29,110 @@ module Openbao
     end
 
     def api_address
-      schema = tls_enabled? ? 'https' : 'http'
-      if @node['openbao']['nodes'].include? @node['fqdn']
-        host = @node['fqdn']
+      if @node['roles'].include? 'vault'
+        schema = tls_enabled? ? 'https' : 'http'
+        if @node['openbao']['nodes'].include? @node['fqdn']
+          host = @node['fqdn']
+        else
+          @node['openbao']['vip_hostname']
+        end
+        port = @node['openbao']['port'] || 8200
+
+        "#{schema}://#{host}:#{port}"
       else
-        @node['openbao']['vip_hostname']
-      end
-      port = @node['openbao']['port'] || 8200
-
-      "#{schema}://#{host}:#{port}"
-    end
-
-    def wait_for_health_ready(timeout: 120, interval: 2)
-      Timeout.timeout(timeout) do
-        loop do
-          begin
-            health = Vault.sys.health_status
-
-            initialized = health.instance_variable_get(:@initialized)
-            sealed = health.instance_variable_get(:@sealed)
-
-            Chef::Log.info("Vault health: initialized=#{initialized}, sealed=#{sealed}")
-
-            return true
-          rescue Vault::HTTPClientError => e
-            Chef::Log.warn("Vault not ready yet: #{e.message}")
-          rescue => e
-            Chef::Log.warn("Unexpected error: #{e}")
-          end
-
-          sleep interval
-        end
+        @node['openbao']['url']
       end
     end
 
-    def wait_for_raft_ready(timeout: 120, interval: 2)
-      Timeout.timeout(timeout) do
-        loop do
-          begin
-            leader = Vault.sys.leader
+    def chef_vault_auth(key_path)
+      vault_addr = api_address()
+      mount = 'auth/chef'
+      client_name = @node['fqdn']
 
-            leader_address = leader['leader_address']
-            self_is_leader = leader['is_self']
+      key = OpenSSL::PKey::RSA.new(::File.read(key_path))
 
-            if leader_address && !leader_address.empty?
-              Chef::Log.info("Raft leader elected: #{leader_address}")
-              Chef::Log.info("This node is leader: #{self_is_leader}")
-              return true
-            end
+      # --- 1. challenge ---
+      uri = URI("#{vault_addr}/v1/#{mount}/challenge")
 
-            Chef::Log.info('Waiting for Raft leader election...')
-          rescue => e
-            Chef::Log.warn("Raft not ready yet: #{e}")
-          end
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = uri.scheme == 'https'
 
-          sleep interval
+      if http.use_ssl?
+        http.ca_file = system_ca_file(@node)
+        http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      end
+
+      req = Net::HTTP::Post.new(uri)
+      req['Content-Type'] = 'application/json'
+      req.body = { client_name: client_name }.to_json
+
+      res = http.request(req)
+      raise "challenge failed: #{res.body}" unless res.code.to_i == 200
+
+      data = JSON.parse(res.body)['data']
+
+      challenge_id = data['challenge_id']
+      nonce        = data['nonce']
+      timestamp    = data['timestamp'].to_s
+      method       = data['method']
+      path         = data['path']
+
+      # имитация python sleep((time.time() - x) * 5)
+      # (можно убрать если сервер не требует)
+      sleep 0.1
+
+      # --- 2. string_to_sign ---
+      string_to_sign = [
+        client_name,
+        challenge_id,
+        nonce,
+        timestamp,
+        method,
+        path
+      ].join("\n")
+
+      # --- 3. sign ---
+      signature = key.sign(OpenSSL::Digest::SHA256.new, string_to_sign)
+      signature_b64 = Base64.strict_encode64(signature)
+
+      # --- 4. login ---
+      uri = URI("#{vault_addr}/v1/#{mount}/login")
+
+      req = Net::HTTP::Post.new(uri)
+      req['Content-Type'] = 'application/json'
+      req.body = {
+        client_name: client_name,
+        challenge_id: challenge_id,
+        signature: signature_b64
+      }.to_json
+
+      res = http.request(req)
+      raise "login failed: #{res.body}" unless res.code.to_i == 200
+
+      body = JSON.parse(res.body)
+
+      body.dig('auth', 'client_token')
+    end
+
+    def setup!
+      Vault.address = api_address()
+
+      if ::File.exists? '/etc/openbao/root_token'
+        token = read_local_token('/etc/openbao/root_token')
+        if token
+          Vault.token = token
         end
+      elsif ::File.exists? '/etc/cinc/client.pem'
+      token = chef_vault_auth('/etc/cinc/client.pem')
+      if token
+        Vault.token = token
+      end
+      end
+      if !Vault.token
+        raise 'cannot configure vault'
+      end
+      Vault.configure do |config|
+        config.ssl_ca_cert = system_ca_file(@node)
       end
     end
 
@@ -125,34 +172,6 @@ module Openbao
       write(path, data, mount)
     end
 
-    def setup!
-      Vault.address = api_address()
-
-      cert_file = '/etc/openbao/chef_cert.pem'
-      key_file  = '/etc/openbao/chef_key.pem'
-
-      if ::File.exist?(cert_file)
-        Vault.configure do |config|
-          config.ssl_cert_file = cert_file
-          config.ssl_key_file  = key_file
-          config.ssl_ca_cert = system_ca_file(@node)
-        end
-
-        auth = Vault.auth.cert('certs')
-        Vault.token = auth.auth.client_token
-      else
-        token = read_local_token('/etc/openbao/root_token')
-        if token
-          Vault.token = token
-        else
-          Chef::Log.warn("No token file found")
-        end
-        Vault.configure do |config|
-          config.ssl_ca_cert = system_ca_file(@node)
-        end
-      end
-    end
-
     def normalize(path)
       path.sub(%r{/$}, '')
     end
@@ -186,14 +205,12 @@ module Openbao
       secret = Vault.kv(mount).read(path)
       return nil unless secret
 
-      secret.data[:data] # KV v2 unwrap
+      secret.data
     rescue Vault::HTTPClientError => e
-      if e.message.include?('404')
-        nil
-      else
-        Chef::Log.error("Failed to read secret #{mount}/#{path}: #{e}")
-        raise
-      end
+      return nil if e.message.include?('404')
+
+      Chef::Log.error("Failed to read secret #{mount}/#{path}: #{e}")
+      raise
     end
 
     def write(path, data, mount)
@@ -298,6 +315,54 @@ module Openbao
     rescue => e
       Chef::Log.error("Failed to unmount #{path}: #{e}")
       raise
+    end
+
+    def wait_for_health_ready(timeout: 120, interval: 2)
+      Timeout.timeout(timeout) do
+        loop do
+          begin
+            health = Vault.sys.health_status
+
+            initialized = health.instance_variable_get(:@initialized)
+            sealed = health.instance_variable_get(:@sealed)
+
+            Chef::Log.info("Vault health: initialized=#{initialized}, sealed=#{sealed}")
+
+            return true
+          rescue Vault::HTTPClientError => e
+            Chef::Log.warn("Vault not ready yet: #{e.message}")
+          rescue => e
+            Chef::Log.warn("Unexpected error: #{e}")
+          end
+
+          sleep interval
+        end
+      end
+    end
+
+    def wait_for_raft_ready(timeout: 120, interval: 2)
+      Timeout.timeout(timeout) do
+        loop do
+          begin
+            leader = Vault.sys.leader
+
+            leader_address = leader['leader_address']
+            self_is_leader = leader['is_self']
+
+            if leader_address && !leader_address.empty?
+              Chef::Log.info("Raft leader elected: #{leader_address}")
+              Chef::Log.info("This node is leader: #{self_is_leader}")
+              return true
+            end
+
+            Chef::Log.info('Waiting for Raft leader election...')
+          rescue => e
+            Chef::Log.warn("Raft not ready yet: #{e}")
+          end
+
+          sleep interval
+        end
+      end
     end
 
     def pki_root_exists?(mount)

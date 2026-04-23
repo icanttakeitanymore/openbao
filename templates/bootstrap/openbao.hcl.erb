@@ -26,3 +26,16 @@ storage "raft" {
   }
   <% end %>
 }
+
+plugin_directory = "/etc/openbao/"
+
+log_level  = "info"
+log_format = "json"
+
+log_file = "/var/log/openbao/openbao.log"
+
+log_rotate_duration = "24h"
+
+log_rotate_bytes = 104857600  # 100 MB
+
+log_rotate_max_files = 14

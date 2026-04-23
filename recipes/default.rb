@@ -36,5 +36,21 @@ directory '/etc/openbao/' do
   action :create
 end
 
+directory '/var/log/openbao' do
+  owner 'openbao'
+  group 'openbao'
+  mode '0755'
+  action :create
+end
+
 include_recipe 'openbao::setup'
 include_recipe 'openbao::auto_unseal'
+
+remote_file '/etc/openbao/chef-vault-auth-plugin-1' do
+  checksum node['openbao']['chef-vault-auth-plugin']['sha256']
+  source node['openbao']['chef-vault-auth-plugin']['url']
+  owner 'root'
+  group 'root'
+  mode '0755'
+  action :create
+end

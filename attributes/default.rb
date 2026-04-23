@@ -1,5 +1,3 @@
-
-
 default['openbao']['nodes'] = %w(
   01.vault.east.local
   02.vault.east.local
@@ -7,7 +5,6 @@ default['openbao']['nodes'] = %w(
 )
 
 default['openbao']['vip_hostname'] = 'openbao.east.local'
-
 
 default['openbao']['bootstrap']['auto_init'] = true
 default['openbao']['bootstrap']['init_host'] = "01.vault.east.local"
@@ -33,3 +30,7 @@ default['openbao']['bootstrap']['pki_role'] = 'bao'
 
 # after the run put /etc/openbao/ca.pem into your system ca bundle
 # or make new pki.
+
+default['openbao']['chef-vault-auth-plugin']['url'] = 'https://github.com/icanttakeitanymore/chef-vault-auth-plugin/releases/download/v2026.04.23-2/chef-vault-auth-plugin'
+default['openbao']['chef-vault-auth-plugin']['sha256'] =
+  '7f0f126b1edff3a2bd8dc89f436e13f910dc472b1c40c68cb9272739633f50a9'
