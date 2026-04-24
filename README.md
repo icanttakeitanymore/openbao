@@ -1,5 +1,5 @@
 # openbao
-* currently it's cookbooks for showoffs and copypaste into production code, it cannot be applyed as is without others it depends on.
+* currently this cookbook is for showoffs and copypaste into production code, it cannot be applyed as is without others it depends on.
 
 # stupidly lazy cookbook for openbao raft cluster.
 it requires around of two chef-client runs to get tls cluster with internal pki.
