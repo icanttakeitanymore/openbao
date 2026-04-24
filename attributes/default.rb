@@ -4,7 +4,7 @@ default['openbao']['nodes'] = %w(
   03.vault.east.local
 )
 
-default['openbao']['vip_hostname'] = 'openbao.east.local'
+default['openbao']['vip_hostname'] = 'vault.east.local'
 
 default['openbao']['bootstrap']['auto_init'] = true
 default['openbao']['bootstrap']['init_host'] = "01.vault.east.local"

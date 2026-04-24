@@ -61,3 +61,6 @@ node['openbao']['policies'].each do |policy_name, rules_data|
     action node['openbao']['policies_actions'][policy_name]
   end
 end
+
+
+include_recipe 'envoy'
