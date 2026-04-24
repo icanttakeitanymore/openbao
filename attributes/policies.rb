@@ -2,7 +2,7 @@ default['openbao']['policies'] = {
   common: {
     path: {
       'common/*' => {
-        capabilities: ['read','update', 'list']
+        capabilities: ['read', 'update', 'list']
       },
     }
   }

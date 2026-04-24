@@ -43,8 +43,8 @@ default['envoy']['vhosts'] = {
             unhealthy_threshold: 3,
             healthy_threshold: 2,
             expected_statuses: [
-                { start: 200, end: 201 },
-                { start: 429, end: 430 } # lol
+              { start: 200, end: 201 },
+              { start: 429, end: 430 } # lol
             ]
           }
         }
