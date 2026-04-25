@@ -28,9 +28,9 @@ default['openbao']['pki'] = {
         ttl: '365d',
         max_ttl: '4000d',
         allowed_domains: [
-          '01.pg-common.east.local',
-          '02.pg-common.east.local',
-          '03.pg-common.east.local',
+          '01.pg-common.db.east.local',
+          '02.pg-common.db.east.local',
+          '03.pg-common.db.east.local',
           'pg-common.east.local',
           'patroni',
           'replication',
@@ -38,7 +38,8 @@ default['openbao']['pki'] = {
           'bpolozov',
           'pdns',
         ],
-        allow_localhost: true
+        allow_localhost: true,
+        allow_bare_domains: true,
       }
     }
   }
