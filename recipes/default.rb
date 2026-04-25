@@ -55,13 +55,8 @@ remote_file '/etc/openbao/chef-vault-auth-plugin-1' do
   action :create
 end
 
-node['openbao']['policies'].each do |policy_name, rules_data|
-  bao_policy policy_name do
-    rules rules_data.to_h
-    action node['openbao']['policies_actions'][policy_name]
-  end
-end
-
+include_recipe 'openbao::policies'
+include_recipe 'openbao::pkis'
 include_recipe 'envoy'
 include_recipe 'frr'
 include_recipe 'frr::dummy'

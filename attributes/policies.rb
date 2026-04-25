@@ -5,6 +5,16 @@ default['openbao']['policies'] = {
         capabilities: ['read', 'update', 'list']
       },
     }
+  },
+  ns: {
+    path: {
+      'pki-pg/issue/pg_cs' => {
+        capabilities: ['read', 'update']
+      },
+      'ns/*' => {
+        capabilities: ['read', 'update', 'list']
+      },
+    }
   }
 }
 
