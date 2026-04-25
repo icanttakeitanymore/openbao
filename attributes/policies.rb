@@ -8,7 +8,7 @@ default['openbao']['policies'] = {
   },
   ns: {
     path: {
-      'pki-pg/issue/pg_cs' => {
+      'pki-ns/issue/ns' => {
         capabilities: ['read', 'update']
       },
       'ns/*' => {
@@ -18,7 +18,7 @@ default['openbao']['policies'] = {
   },
   "pg-common" => {
     path: {
-      'pki-pg/issue/pg_cs' => {
+      'pki-pg-common/issue/main' => {
         capabilities: ['read', 'update']
       },
       'ns/*' => {
