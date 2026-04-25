@@ -18,6 +18,10 @@ service 'openbao' do
   action [:enable, :start]
 end
 
+allowed_domains = [node['openbao']['vip_hostname']]
+allowed_domains += node['openbao']['nodes']
+allowed_domains += ['localhost']
+
 if node['fqdn'] == node['openbao']['bootstrap']['init_host']
   if node['openbao']['bootstrap']['auto_init']
     bao_init 'initialize' do
@@ -35,8 +39,7 @@ if node['fqdn'] == node['openbao']['bootstrap']['init_host']
     action :create
   end
 
-  allowed_domains = [node['openbao']['vip_hostname']]
-  allowed_domains += node['openbao']['nodes']
+
 
   bao_pki_role node['openbao']['bootstrap']['pki_role'] do
     mount node['openbao']['bootstrap']['pki_mount']
@@ -60,8 +63,8 @@ bao_pki_cert 'bao-cert' do
   mount node['openbao']['bootstrap']['pki_mount']
   role node['openbao']['bootstrap']['pki_role']
 
-  ip_sans node['ipaddress'] + ',127.0.0.1'
-  alt_names ([node['fqdn']] + node['openbao']['nodes']).join(',')
+  ip_sans node['ipaddress'] + ',127.0.0.1,10.100.0.100'
+  alt_names allowed_domains.join(',')
 
   certificate '/etc/openbao/cert.pem'
   private_key '/etc/openbao/key.pem'
@@ -71,4 +74,11 @@ bao_pki_cert 'bao-cert' do
   mode '0644'
 
   ttl '365d'
+  notifies :reload, "service[openbao]", :delayed
+  notifies :reload, "service[envoy]", :delayed
+end
+
+
+service 'envoy' do
+  action :nothing
 end

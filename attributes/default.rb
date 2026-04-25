@@ -6,7 +6,7 @@ default['openbao']['nodes'] = %w(
 
 default['openbao']['vip_hostname'] = 'vault.east.local'
 
-default['openbao']['bootstrap']['auto_init'] = true
+default['openbao']['bootstrap']['auto_init'] = false
 default['openbao']['bootstrap']['init_host'] = "01.vault.east.local"
 
 # you don't need more if after people leave your team you don't rekey vault.

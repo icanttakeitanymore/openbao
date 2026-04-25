@@ -8,6 +8,7 @@ chef_version '>= 16.0'
 
 depends 'common'
 depends 'envoy'
+depends 'frr'
 # The `issues_url` points to the location where issues for this cookbook are
 # tracked.  A `View Issues` link will be displayed on this cookbook's page when
 # uploaded to a Supermarket.

@@ -63,3 +63,5 @@ node['openbao']['policies'].each do |policy_name, rules_data|
 end
 
 include_recipe 'envoy'
+include_recipe 'frr'
+include_recipe 'frr::dummy'

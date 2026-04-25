@@ -20,6 +20,7 @@ property :mode, [String, Integer], coerce: proc { |m| m.is_a?(Integer) ? m.to_s(
 default_action :create
 
 load_current_value do |new_resource|
+  current_value_does_not_exist! if ENV["BAO_FORCE_CERT_ISSUE"]
   if new_resource.mode.length == 3
     new_resource.mode = '0' + new_resource.mode
   end

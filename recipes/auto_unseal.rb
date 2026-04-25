@@ -1,7 +1,7 @@
 template '/usr/local/bin/openbao-unseal.sh' do
   source 'openbao-unseal.sh.erb'
   variables(
-    api_address: openbao.api_address
+    schema: openbao.tls_enabled? ? 'https' : 'http'
   )
   owner 'root'
   group 'root'

@@ -29,7 +29,10 @@ module Openbao
     end
 
     def api_address
-      if @node['roles'].include? 'vault'
+      
+      if ENV['VAULT_ADDR']
+        return ENV['VAULT_ADDR']
+      elsif @node['roles'].include? 'vault'
         schema = tls_enabled? ? 'https' : 'http'
         if @node['openbao']['nodes'].include? @node['fqdn']
           host = @node['fqdn']
@@ -116,8 +119,9 @@ module Openbao
 
     def setup!
       Vault.address = api_address()
-
-      if ::File.exists? '/etc/openbao/root_token'
+      if ENV['VAULT_TOKEN']
+        Vault.token = ENV['VAULT_TOKEN']
+      elsif ::File.exists? '/etc/openbao/root_token'
         token = read_local_token('/etc/openbao/root_token')
         if token
           Vault.token = token

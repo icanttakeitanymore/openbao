@@ -24,13 +24,13 @@ default['envoy']['vhosts'] = {
           protocol: :https,
           # lb_policy: 'RING_HASH',
           endpoints: [
-            '01.vault.east.local:8200',
-            '02.vault.east.local:8200',
-            '03.vault.east.local:8200'
+            '192.168.5.11:8200',
+            '192.168.5.12:8200',
+            '192.168.5.13:8200'
           ],
 
           tls: {
-            sni: 'openbao.east.local',
+            sni: 'vault.east.local',
           },
 
           timeout: '10s',

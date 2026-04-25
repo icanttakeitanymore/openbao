@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-API_URL="<%= @api_address %>"
+API_URL="<%= @schema %>://127.0.0.1:8200"
 KEY_FILE="<%= node['openbao']['unseal_key_path'] %>"
 
 SEAL_STATUS=$(curl -s "${API_URL}/v1/sys/seal-status")
