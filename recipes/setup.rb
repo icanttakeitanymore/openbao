@@ -39,8 +39,6 @@ if node['fqdn'] == node['openbao']['bootstrap']['init_host']
     action :create
   end
 
-
-
   bao_pki_role node['openbao']['bootstrap']['pki_role'] do
     mount node['openbao']['bootstrap']['pki_mount']
     ttl '365d'
@@ -49,13 +47,6 @@ if node['fqdn'] == node['openbao']['bootstrap']['init_host']
     allow_localhost true
     action :create
   end
-
-  bao_auth 'cert' do
-    path 'cert'
-    type 'cert'
-    action :enable
-  end
-
 end
 
 bao_pki_cert 'bao-cert' do

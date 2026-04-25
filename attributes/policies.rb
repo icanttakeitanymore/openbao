@@ -14,10 +14,23 @@ default['openbao']['policies'] = {
       'ns/*' => {
         capabilities: ['read', 'update', 'list']
       },
-    }
-  }
+    },
+  },
+  "pg-common" => {
+    path: {
+      'pki-pg/issue/pg_cs' => {
+        capabilities: ['read', 'update']
+      },
+      'ns/*' => {
+        capabilities: ['read', 'update', 'list']
+      },
+    },
+  },
 }
 
 default['openbao']['policies_actions'] = {
-  common: :create
+  common: :create,
+  ns: :create,
+  "pg-common" => :create,
+
 }

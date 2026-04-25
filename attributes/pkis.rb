@@ -17,5 +17,29 @@ default['openbao']['pki'] = {
         allow_localhost: true
       }
     }
+  },
+  "pki-pg-common" => {
+    mount: 'pki-pg-common',
+    default_lease_ttl: '365d',
+    max_lease_ttl: '8000d',
+
+    roles: {
+      main: {
+        ttl: '365d',
+        max_ttl: '4000d',
+        allowed_domains: [
+          '01.pg-common.east.local',
+          '02.pg-common.east.local',
+          '03.pg-common.east.local',
+          'pg-common.east.local',
+          'patroni',
+          'replication',
+          'barman',
+          'bpolozov',
+          'pdns',
+        ],
+        allow_localhost: true
+      }
+    }
   }
 }

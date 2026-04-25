@@ -1,4 +1,4 @@
-node['openbao']['pki']['bootstrap']['mounts'].each do |mount_name, mount_data|
+node['openbao']['pki'].each do |mount_name, mount_data|
   bao_pki mount_data[:mount] do
     default_lease_ttl mount_data[:default_lease_ttl]
     max_lease_ttl mount_data[:max_lease_ttl]
