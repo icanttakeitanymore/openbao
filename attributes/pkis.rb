@@ -36,7 +36,24 @@ default['openbao']['pki'] = {
           'replication',
           'barman',
           'bpolozov',
-          'pdns',
+        ],
+        allow_localhost: true,
+        allow_bare_domains: true,
+      },
+      pdns: {
+        ttl: '365d',
+        max_ttl: '4000d',
+        allowed_domains: [
+          'pdns'
+        ],
+        allow_localhost: true,
+        allow_bare_domains: true,
+      },
+      cinc: {
+        ttl: '365d',
+        max_ttl: '4000d',
+        allowed_domains: [
+          'cinc'
         ],
         allow_localhost: true,
         allow_bare_domains: true,

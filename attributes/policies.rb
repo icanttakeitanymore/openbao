@@ -8,10 +8,20 @@ default['openbao']['policies'] = {
   },
   ns: {
     path: {
-      'pki-ns/issue/ns' => {
+      'pki-pg-common/issue/pdns' => {
         capabilities: ['read', 'update']
       },
       'ns/*' => {
+        capabilities: ['read', 'update', 'list']
+      },
+    },
+  },
+  cinc: {
+    path: {
+      'pki-pg-common/issue/cinc' => {
+        capabilities: ['read', 'update']
+      },
+      'cinc/*' => {
         capabilities: ['read', 'update', 'list']
       },
     },
