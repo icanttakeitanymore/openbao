@@ -6,11 +6,14 @@ property :role_name, String, name_property: true
 
 property :allowed_domains, Array, default: []
 property :allow_subdomains, [true, false], default: true
+property :allow_glob_domains, [true,false], default: false
 property :allow_localhost, [true, false], default: true
 property :allow_any_name, [true, false], default: false
 property :allow_bare_domains, [true, false], default: true
+property :enforce_hostnames, [true, false], default: true
 property :ttl, String, default: '365h'
 property :max_ttl, String, default: '4000h'
+property :organization, String, default: ''
 
 action :create do
   client = openbao
@@ -25,9 +28,11 @@ action :create do
     allow_any_name: new_resource.allow_any_name,
     allow_localhost: new_resource.allow_localhost,
     allow_bare_domains: new_resource.allow_bare_domains,
+    enforce_hostnames: new_resource.enforce_hostnames,
+    allow_glob_domains: new_resource.allow_glob_domains,
     ttl: client.duration_to_seconds(new_resource.ttl),
     max_ttl: client.duration_to_seconds(new_resource.max_ttl),
-
+    organization: new_resource.organization,
   }
 
   if client.normalize_role(current) != client.normalize_role(desired)

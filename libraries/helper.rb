@@ -453,6 +453,9 @@ module Openbao
         allow_subdomains: data[:allow_subdomains],
         allow_any_name: data[:allow_any_name],
         allow_bare_domains: data[:allow_bare_domains],
+        enforce_hostnames: data[:enforce_hostnames],
+        allow_glob_domains: data[:allow_glob_domains],
+        organization: data[:organization].is_a?(Array) ? data[:organization] : [data[:organization]],
         max_ttl: data[:max_ttl].to_s,
         ttl: data[:ttl].to_s
       }

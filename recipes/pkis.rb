@@ -13,6 +13,9 @@ node['openbao']['pki'].each do |mount_name, mount_data|
       max_ttl role_data[:max_ttl]
       allowed_domains role_data[:allowed_domains]
       allow_localhost role_data[:allow_localhost]
+      enforce_hostnames role_data[:enforce_hostnames]
+      allow_glob_domains role_data[:allow_glob_domains]
+      organization role_data[:organization] || mount_name
       action :create
     end
   end
