@@ -29,7 +29,6 @@ module Openbao
     end
 
     def api_address
-      
       if ENV['VAULT_ADDR']
         return ENV['VAULT_ADDR']
       elsif @node['roles'].include? 'vault'

@@ -1,4 +1,3 @@
-
 node['openbao']['policies'].each do |policy_name, rules_data|
   bao_policy policy_name do
     rules rules_data.to_h

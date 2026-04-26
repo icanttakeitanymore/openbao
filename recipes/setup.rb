@@ -69,7 +69,6 @@ bao_pki_cert 'bao-cert' do
   notifies :reload, "service[envoy]", :delayed
 end
 
-
 service 'envoy' do
   action :nothing
 end
