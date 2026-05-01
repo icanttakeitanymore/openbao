@@ -32,6 +32,6 @@ default['openbao']['bootstrap']['pki_role'] = 'bao'
 # or make new pki.
 
 default['openbao']['chef-vault-auth-plugin']['url'] =
-  'https://github.com/icanttakeitanymore/chef-vault-auth-plugin/releases/download/v2026.04.23-2/chef-vault-auth-plugin'
+  'https://github.com/icanttakeitanymore/chef-vault-auth-plugin/releases/download/v2026.05.01-1/chef-vault-auth-plugin'
 default['openbao']['chef-vault-auth-plugin']['sha256'] =
-  '7f0f126b1edff3a2bd8dc89f436e13f910dc472b1c40c68cb9272739633f50a9'
+  '6c71ba421237a867db4038b5c5394d4d090ba8afdbb6f25ccd913c10f5d41bfb'

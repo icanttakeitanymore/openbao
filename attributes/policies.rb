@@ -76,5 +76,4 @@ default['openbao']['policies_actions'] = {
   "pg-common" => :create,
   "k8s-cp" => :create,
   "k8s-kubelet" => :create,
-
 }

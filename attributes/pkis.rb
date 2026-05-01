@@ -117,6 +117,7 @@ default['openbao']['pki'] = {
         ttl: '365d',
         max_ttl: '4000d',
         allowed_domains: [
+          'kube-apiserver-kubelet-client',
           'system:kube-controller-manager',
           'system:kube-scheduler',
           'bpolozov' # мой юзер, можно отдельный pki с админами кластера

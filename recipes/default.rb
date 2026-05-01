@@ -46,7 +46,7 @@ end
 include_recipe 'openbao::setup'
 include_recipe 'openbao::auto_unseal'
 
-remote_file '/etc/openbao/chef-vault-auth-plugin-1' do
+remote_file '/etc/openbao/chef-vault-auth-plugin-2' do
   checksum node['openbao']['chef-vault-auth-plugin']['sha256']
   source node['openbao']['chef-vault-auth-plugin']['url']
   owner 'root'
