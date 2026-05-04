@@ -63,11 +63,22 @@ default['openbao']['policies'] = {
       'pki-k8s/issue/nodes' => {
         capabilities: ['read', 'update']
       },
-      'k8s/*' => {
-        capabilities: ['read', 'update', 'list']
+    },
+  },
+  "scylla" => {
+    path: {
+      'scylla-pki/issue/nodes' => {
+        capabilities: ['read', 'update']
       },
     },
   },
+  "workstation" => {
+    path: {
+      'nebula-pki/issue/main-network' => {
+        capabilities: ['update']
+      },
+    }
+  }
 }
 
 default['openbao']['policies_actions'] = {
@@ -76,4 +87,6 @@ default['openbao']['policies_actions'] = {
   "pg-common" => :create,
   "k8s-cp" => :create,
   "k8s-kubelet" => :create,
+  "scylla" => :create,
+  "workstation" => :create,
 }

@@ -9,6 +9,7 @@ property :root_type, String, default: "exported"
 property :root_ttl, String, default: "8000d"
 property :root_common_name, String, default: "bao-pki"
 property :root_opts, Hash, default: {}
+
 action :create do
   client = openbao
   path = new_resource.path.sub(%r{/$}, '')

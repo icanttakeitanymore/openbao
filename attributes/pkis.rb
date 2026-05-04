@@ -97,7 +97,7 @@ default['openbao']['pki'] = {
         allow_bare_domains: true,
         enforce_hostnames: false,
         allow_glob_domains: true,
-      },         
+      },
       "kubelet" => {
         ttl: '365d',
         max_ttl: '4000d',
@@ -139,6 +139,34 @@ default['openbao']['pki'] = {
         allow_localhost: true,
         allow_bare_domains: true,
       },
+    }
+  },
+  "scylla-pki" => {
+    mount: 'scylla-pki',
+    default_lease_ttl: '365d',
+    max_lease_ttl: '8000d',
+
+    roles: {
+      nodes: {
+        ttl: '365d',
+        max_ttl: '4000d',
+        allowed_domains: [
+          '01.scylla.east.local',
+          '02.scylla.east.local',
+          '03.scylla.east.local',
+          'cassandra'
+        ],
+        allow_localhost: true
+      },
+      clients: {
+        ttl: '365d',
+        max_ttl: '4000d',
+        allowed_domains: [
+          'bpolozov',
+        ],
+        allow_localhost: true,
+        allow_bare_domains: true
+      }
     }
   }
 }

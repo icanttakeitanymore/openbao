@@ -1,5 +1,6 @@
 require 'vault'
 require 'timeout'
+require 'mixlib/shellout'
 
 module Openbao
   class Client
@@ -530,6 +531,60 @@ module Openbao
           ip_sans: sans,
           alt_names: alt_names,
           ttl: ttl
+        ).data
+      )
+    end
+
+    def generate_nebula_keys(key_path, pub_path)
+      return if File.exist?(key_path) && File.exist?(pub_path)
+
+      Chef::Log.info("Generating Nebula keys: #{key_path}")
+
+      # Формируем команду
+      cmd = Mixlib::ShellOut.new(
+        "nebula-cert keygen -out-key #{key_path} -out-pub #{pub_path}"
+      )
+
+      cmd.run_command
+
+      cmd.error!
+    end
+
+    def nebula_cert_needs_renewal?(cert_path:, threshold_days:)
+      return true unless File.exist?(cert_path)
+
+      require 'mixlib/shellout'
+      require 'json'
+      require 'time'
+
+      # Получаем данные о сертификате в формате JSON
+      cmd = Mixlib::ShellOut.new("nebula-cert print -path #{cert_path}")
+      cmd.run_command
+
+      if cmd.error?
+        Chef::Log.error("Nebula-cert failed: #{cmd.stderr}")
+        return true # Если не можем прочитать, лучше перевыпустить
+      end
+
+      cert_info = JSON.parse(cmd.stdout)
+      # В JSON поле называется 'notAfter' внутри 'details'
+      not_after = Time.parse(cert_info['details']['notAfter'])
+
+      # Проверяем, осталось ли времени меньше, чем порог (в секундах)
+      # 86400 секунд в сутках
+      (not_after - Time.now) < (threshold_days * 86400)
+    end
+
+    def nebula_cert(role:, name:, pub_key_path:, ips:, groups:, mount: 'nebula-pki')
+      public_key_content = File.read(pub_key_path)
+
+      Mash.new(
+        Vault.logical.write(
+          "/#{mount}/issue/#{role}",
+          name: name,
+          public_key: public_key_content,
+          ips: ips,           # Передаем строку или массив, например "10.0.0.1/24"
+          groups: groups,     # Передаем строку или массив, например "main,nodes"
         ).data
       )
     end

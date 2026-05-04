@@ -6,7 +6,7 @@ property :role_name, String, name_property: true
 
 property :allowed_domains, Array, default: []
 property :allow_subdomains, [true, false], default: true
-property :allow_glob_domains, [true,false], default: false
+property :allow_glob_domains, [true, false], default: false
 property :allow_localhost, [true, false], default: true
 property :allow_any_name, [true, false], default: false
 property :allow_bare_domains, [true, false], default: true
